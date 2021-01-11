@@ -1,11 +1,17 @@
 import 'Restaurant.dart';
 
 class RestaurantsResponse {
+  bool error;
+  String message;
+  int count;
   List<Restaurant> restaurants;
 
   RestaurantsResponse({this.restaurants});
 
   RestaurantsResponse.fromJson(Map<String, dynamic> json) {
+    error = json['error'];
+    message = json['message'];
+    count = json['count'];
     if (json['restaurants'] != null) {
       restaurants = new List<Restaurant>();
       json['restaurants'].forEach((v) {

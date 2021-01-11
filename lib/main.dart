@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail/page/detail_page.dart';
 
 import 'ui/home/page/home_page.dart';
+import 'ui/search/page/search_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider<RestaurantProvider>(
+      create: (_) => RestaurantProvider(
+        apiService: ApiService(),
+      ),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,10 +27,13 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.orange[800],
         accentColor: Colors.orange[600],
       ),
-      initialRoute: '/',
+      initialRoute: HomePage.routeName,
       routes: {
-        '/': (context) => HomePage(),
-        '/detailPage': (context) => DetailPage()
+        HomePage.routeName: (context) => HomePage(),
+        DetailPage.routeName: (context) => DetailPage(
+              idRestaurant: ModalRoute.of(context).settings.arguments,
+            ),
+        SearchPage.routeName: (context) => SearchPage()
       },
     );
   }

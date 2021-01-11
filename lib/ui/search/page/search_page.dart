@@ -3,47 +3,59 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/model/Restaurant.dart';
 import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/ui/home/widget/item_restaurant.dart';
-import 'package:restaurant_app/ui/search/page/search_page.dart';
 
-class HomePage extends StatelessWidget {
-  static const routeName = "/home_page";
+class SearchPage extends StatefulWidget {
+  static const routeName = "/searh_page";
 
   @override
+  _SearchPageState createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  var _query = TextEditingController();
+
+  @override
+  void dispose() {
+    _query.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
-    Provider.of<RestaurantProvider>(context, listen: false).fetchRestaurants();
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, isScrolled) {
           return [
             SliverAppBar(
-              title: Text(isScrolled ? "Restaurant" : ""),
+              automaticallyImplyLeading: false,
+              title: Text(isScrolled ? "Search Restaurant" : ""),
               elevation: 0,
               pinned: true,
-              actions: [
-                IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        SearchPage.routeName,
-                      );
-                    })
-              ],
               expandedHeight: 160,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  padding: EdgeInsets.all(28),
+                  padding: EdgeInsets.all(30),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Restaurant",
+                        "Search Restaurant",
                         style: TextStyle(fontSize: 24, color: Colors.white),
                       ),
-                      Text(
-                        "Recomended restaurant for you!",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      Container(
+                        child: TextField(
+                          controller: _query,
+                          decoration: new InputDecoration(
+                              hintText: 'Restaurant mantap',
+                              focusColor: Colors.white,
+                              fillColor: Colors.white),
+                          style: TextStyle(color: Colors.white),
+                          onChanged: (v) async {
+                            await Provider.of<RestaurantProvider>(context,
+                                    listen: false)
+                                .searhRestaurants(v);
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -54,13 +66,13 @@ class HomePage extends StatelessWidget {
         },
         body: Consumer<RestaurantProvider>(
           builder: (context, state, _) {
-            if (state.state == ResultState.Loading) {
+            if (state.stateSearch == ResultState.Loading) {
               return Center(child: CircularProgressIndicator());
-            } else if (state.state == ResultState.HasData) {
-              return _buildList(state.restaurants.restaurants);
-            } else if (state.state == ResultState.NoData) {
-              return Center(child: Text(state.message));
-            } else if (state.state == ResultState.Error) {
+            } else if (state.stateSearch == ResultState.HasData) {
+              return _buildList(state.restaurantsSearch.restaurants);
+            } else if (state.stateSearch == ResultState.NoData) {
+              return Center(child: Text(state.messageSearch));
+            } else if (state.stateSearch == ResultState.Error) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -68,28 +80,20 @@ class HomePage extends StatelessWidget {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
-                      Provider.of<RestaurantProvider>(context, listen: false)
-                          .fetchRestaurants();
+                      Provider.of<RestaurantProvider>(context,
+                                    listen: false)
+                                .searhRestaurants(_query.text);
                     },
                   ),
                 ],
               );
             } else {
-              return Container();
+              return Center(child: Text("Silahkan search dengan kata kunci"));
             }
           },
         ),
       ),
     );
-  }
-}
-
-class BuildList extends StatelessWidget {
-  final List<Restaurant> restaurant;
-  BuildList(this.restaurant);
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
 
